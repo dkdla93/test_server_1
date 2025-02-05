@@ -1,0 +1,10 @@
+streamlit
+pandas
+openpyxl
+jinja2
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+numpy
+weasyprint
+requests>=2.28.0

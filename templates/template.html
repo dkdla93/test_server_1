@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @font-face {
+            font-family: 'NanumGothic';
+            src: local('NanumGothic');
+        }
+
+        body {
+            font-family: 'NanumGothic', 'Noto Sans CJK KR', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #343a40;
+        }
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            padding: 32px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .header h1 {
+            color: #1a73e8;
+            font-size: 28px;
+            margin: 0 0 16px 0;
+            word-break: keep-all;
+            line-height: 1.4;
+        }
+        .header .period {
+            color: #495057;
+            font-weight: 700;
+            margin: 12px 0;
+            font-size: 15px;
+        }
+        .header .disclaimer {
+            color: #6c757d;
+            margin: 8px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);  /* 3열에서 2열로 변경 */
+            gap: 24px;
+            margin-bottom: 40px;
+            max-width: 800px;  /* 최대 너비 설정 */
+            margin-left: auto;  /* 가운데 정렬을 위한 설정 */
+            margin-right: auto;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 250px;  /* 최소 너비 설정 */
+        }
+        .stat-card h3 {
+            color: #495057;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            white-space: nowrap;  /* 제목이 줄바꿈되지 않도록 */
+        }
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a73e8;
+        }
+        .earnings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 32px;
+        }
+        .earnings-table th,
+        .earnings-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .earnings-table td {
+            text-align: right;
+        }
+        .earnings-table td:first-child {
+            text-align: left;
+        }
+        .earnings-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            text-align: right;
+        }
+        .earnings-table th:first-child {
+            text-align: left;
+        }
+        .earnings-table tr:hover {
+            background: #f8f9fa;
+        }
+        .table-note {
+            color: #dc3545;
+            font-size: 10.4px;
+            text-align: right;
+            margin-top: 8px;
+        }
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;  /* 모바일에서는 세로로 쌓이도록 */
+                max-width: 100%;  /* 모바일에서는 전체 너비 사용 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="header">
+            <h1>{{ creatorName }} 크리에이터님의 유튜브 쇼츠 음원 사용 현황 보고서</h1>
+            <div class="period">데이터 기간 : {{ period }}</div>
+            <div class="disclaimer">
+                아래 내용은 유튜브 데이터 기반 추정 수익으로 최종 정산 값과는 차이가 있을 수 있으며,<br>이스트 블루와 수익 쉐어 전 예상 매출입니다.
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>매출 순수익</h3>
+                <div class="value">₩{{ format_number(totalRevenue) }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>총 조회수</h3>
+                <div class="value">{{ format_number(totalViews) }}</div>
+            </div>
+        </div>
+
+        <table class="earnings-table">
+            <thead>
+                <tr>
+                    <th>동영상 제목</th>
+                    <th>조회수</th>
+                    <th>매출 순수익</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for video in videoData %}
+                <tr>
+                    <td>{{ video.title }}</td>
+                    <td>{{ format_number(video.views) }}</td>
+                    <td>₩{{ format_number(video.revenue) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="table-note">(50개까지만 표시)</div>
+    </div>
+</body>
+</html>

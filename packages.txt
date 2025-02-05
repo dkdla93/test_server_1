@@ -1,0 +1,13 @@
+libcairo2-dev
+pkg-config
+python3-dev
+libpango1.0-dev
+libgdk-pixbuf2.0-dev
+libffi-dev
+shared-mime-info
+fonts-nanum
+fonts-noto-cjk
+fonts-noto
+fonts-noto-extra
+
+libpango1.0-0

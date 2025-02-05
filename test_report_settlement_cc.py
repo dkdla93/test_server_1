@@ -809,7 +809,7 @@ def process_data(input_df, creator_info_handler, start_date, end_date,
         return None, None, None
 
 def send_creator_emails(reports_data, creator_info_handler, email_user, email_password, 
-                       email_subject_template, email_body_template, cc_addresses=None):
+                       email_subject_template, email_body_template, cc_addresses=None, bcc_addresses=None):
     """크리에이터들에게 이메일을 발송합니다."""
     failed_creators = []
     
@@ -849,6 +849,10 @@ def send_creator_emails(reports_data, creator_info_handler, email_user, email_pa
                 # cc_addresses가 있다면 "," 로 join
                 if cc_addresses:
                     msg["Cc"] = ", ".join(cc_addresses)
+
+                # (추가) BCC 설정
+                if bcc_addresses:
+                    msg["Bcc"] = ", ".join(bcc_addresses)
 
                 # 템플릿에 크리에이터 ID 적용
                 body = email_body_template.format(creator_id=creator_id)
@@ -1153,6 +1157,7 @@ def main():
     email_user = None
     email_password = None
     cc_emails_input = None
+    bcc_emails_input = None
 
     if send_email:
         st.info("""
@@ -1174,6 +1179,13 @@ def main():
             "참조(CC) 이메일 주소 (쉼표로 구분)", 
             placeholder="예) example1@domain.com, example2@domain.com",
             key="cc_emails_input"
+        )
+
+        # (추가) BCC 이메일 입력
+        bcc_emails_input = st.text_input(
+            "숨은참조(BCC) 이메일 주소 (쉼표로 구분)", 
+            placeholder="예) hidden1@domain.com, hidden2@domain.com",
+            key="bcc_emails_input"
         )
 
     # 보고서 생성 버튼
@@ -1280,6 +1292,11 @@ def main():
                                 if cc_emails_input:
                                     cc_addresses = [cc.strip() for cc in cc_emails_input.split(',') if cc.strip()]
 
+                                # (추가) BCC 주소 파싱
+                                bcc_addresses = []
+                                if bcc_emails_input:
+                                    bcc_addresses = [bcc.strip() for bcc in bcc_emails_input.split(',') if bcc.strip()]
+
                                 failed_creators = send_creator_emails(
                                     st.session_state['reports_data'],
                                     st.session_state['creator_info_handler'],
@@ -1287,7 +1304,8 @@ def main():
                                     email_password,
                                     email_subject,  # 사용자가 입력한 제목
                                     email_body,      # 사용자가 입력한 본문
-                                    cc_addresses=cc_addresses  # 여기서 전달
+                                    cc_addresses=cc_addresses,  # 여기서 전달
+                                    bcc_addresses=bcc_addresses
                                 )
                                 if failed_creators:
                                     st.error(f"발송 실패한 크리에이터: {', '.join(failed_creators)}")

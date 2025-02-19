@@ -33,7 +33,7 @@ def get_smtp_info(email_account):
     """
     email_account = email_account.lower()
     if "naver.com" in email_account:
-        return ("smtp.naver.com", 587)
+        return ("smtp.naver.com", 465)
     elif "gmail.com" in email_account:
         return ("smtp.gmail.com", 587)
     else:
@@ -788,16 +788,15 @@ def process_data(input_df, creator_info_handler, start_date, end_date,
             if email_user and email_password:
                 try:
                     smtp_server, smtp_port = get_smtp_info(email_user)
-                  
+                
                     # 네이버 메일인 경우 SMTP_SSL 사용
                     if "naver.com" in email_user.lower():
                         server = smtplib.SMTP_SSL(smtp_server, smtp_port)
                     else:
                         server = smtplib.SMTP(smtp_server, smtp_port)
                         server.starttls()
-                    
                     server.login(email_user, email_password)
-                    
+
                     zip_data = create_zip_file(reports_data, excel_files, input_df, processed_full_data, creator_info_handler)
                     
                     admin_msg = MIMEMultipart()
@@ -845,8 +844,8 @@ def send_creator_emails(reports_data, creator_info_handler, email_user, email_pa
         
         # 네이버 계정이면 SMTP_SSL 사용 (보통 포트 465)
         if "naver.com" in email_user.lower():
-            import smtplib
-            server = smtplib.SMTP_SSL(smtp_server, 587)
+            # get_smtp_info에서 반환된 포트를 사용
+            server = smtplib.SMTP_SSL(smtp_server, smtp_port)
         else:
             server = smtplib.SMTP(smtp_server, smtp_port)
             server.starttls()

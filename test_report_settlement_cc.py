@@ -26,6 +26,21 @@ st.set_page_config(
     layout="wide"
 )
 
+def get_smtp_info(email_account):
+    """
+    이메일 계정에 따라 SMTP 서버와 포트를 반환합니다.
+    네이버 이메일의 경우 smtp.naver.com, Gmail의 경우 smtp.gmail.com을 사용합니다.
+    """
+    email_account = email_account.lower()
+    if "naver.com" in email_account:
+        return ("smtp.naver.com", 587)
+    elif "gmail.com" in email_account:
+        return ("smtp.gmail.com", 587)
+    else:
+        # 다른 이메일도 기본값(예: Gmail)으로 설정하거나, 필요에 따라 분기 추가
+        return ("smtp.gmail.com", 587)
+
+
 def normalize_creator_id(creator_id):
     """크리에이터 ID를 정규화합니다."""
     if not creator_id or pd.isna(creator_id):
@@ -768,11 +783,12 @@ def process_data(input_df, creator_info_handler, start_date, end_date,
                         creator_info_handler     # 현재 핸들러 사용
                     )
                     st.session_state['validation_results'] = True
-            
+        
             # 관리자에게 자동으로 이메일 발송
             if email_user and email_password:
                 try:
-                    server = smtplib.SMTP("smtp.gmail.com", 587)
+                    smtp_server, smtp_port = get_smtp_info(email_user)
+                    server = smtplib.SMTP(smtp_server, smtp_port)
                     server.starttls()
                     server.login(email_user, email_password)
                     
@@ -800,7 +816,7 @@ def process_data(input_df, creator_info_handler, start_date, end_date,
                 except Exception as e:
                     if status_container:
                         status_container.error(f"관리자 이메일 발송 실패: {str(e)}")
-            
+
         return reports_data, excel_files, processed_full_data
         
     except Exception as e:
@@ -817,12 +833,16 @@ def send_creator_emails(reports_data, creator_info_handler, email_user, email_pa
         # SMTP 서버 연결
         placeholder = st.empty()
         placeholder.info("SMTP 서버에 연결 중...")
-        server = smtplib.SMTP("smtp.gmail.com", 587)
+
+        # **수정된 부분: 이메일 계정에 따른 SMTP 서버 선택**
+        smtp_server, smtp_port = get_smtp_info(email_user)
+        server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
+        
         placeholder.info("로그인 시도 중...")
         server.login(email_user, email_password)
         placeholder.success("SMTP 서버 연결 및 로그인 성공")
-        
+
         # 크리에이터별 이메일 발송
         pdf_files = {k: v for k, v in reports_data.items() if k.endswith('_report.pdf')}
         placeholder.info(f"총 {len(pdf_files)}개의 크리에이터 보고서 처리 예정")
@@ -1170,9 +1190,9 @@ def main():
         
         col1, col2 = st.columns(2)
         with col1:
-            email_user = st.text_input("Gmail 계정", placeholder="example@gmail.com", key="email_user")
+            email_user = st.text_input("Gmail/Naver 계정", placeholder="example@gmail.com", key="email_user")
         with col2:
-            email_password = st.text_input("Gmail 앱 비밀번호", type="password", key="email_password")
+            email_password = st.text_input("Gmail/Naver 계정 비밀번호", type="password", key="email_password")
 
         # (추가) CC 이메일 입력
         cc_emails_input = st.text_input(

@@ -33,7 +33,7 @@ def get_smtp_info(email_account):
     """
     email_account = email_account.lower()
     if "naver.com" in email_account:
-        return ("smtp.naver.com", 587)
+        return ("smtp.naver.com", 465)
     elif "gmail.com" in email_account:
         return ("smtp.gmail.com", 587)
     else:
@@ -836,9 +836,15 @@ def send_creator_emails(reports_data, creator_info_handler, email_user, email_pa
 
         # **수정된 부분: 이메일 계정에 따른 SMTP 서버 선택**
         smtp_server, smtp_port = get_smtp_info(email_user)
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
         
+        # 네이버 계정이면 SMTP_SSL 사용 (보통 포트 465)
+        if "naver.com" in email_user.lower():
+            import smtplib
+            server = smtplib.SMTP_SSL(smtp_server, 465)
+        else:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+
         placeholder.info("로그인 시도 중...")
         server.login(email_user, email_password)
         placeholder.success("SMTP 서버 연결 및 로그인 성공")
@@ -1181,8 +1187,8 @@ def main():
 
     if send_email:
         st.info("""
-        이메일 발송을 위해 Gmail 계정 설정이 필요합니다:
-        1. Gmail 계정 (일반 구글 계정)
+        이메일 발송을 위해 이메일 계정 설정이 필요합니다:
+        1. 이메일 계정 (일반 구글 계정, 네이버 계정)
         2. 앱 비밀번호 생성 방법:
            - Google 계정 관리 → 보안 → 2단계 인증 → 앱 비밀번호
            - '앱 선택'에서 '기타' 선택 후 앱 비밀번호 생성
